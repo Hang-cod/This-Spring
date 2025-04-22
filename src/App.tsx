@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import StartPage from './components/StartPage';
 import HomePage from './components/HomePage';
 import CardGamePage from './components/CardGamePage';
+import SpotTheDifferencePage from './components/SpotTheDifferencePage';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<StartPage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/card-game" element={<CardGamePage />} />
+        <Route path="/spot-diff" element={<SpotTheDifferencePage />} /> 
       </Routes>
     </Router>
   );

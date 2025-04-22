@@ -15,7 +15,7 @@ const HomePage: React.FC = () => {
   ]);
 
   const toggleItem = (id: number) => {
-    setItems(items.map(item => 
+    setItems(items.map(item =>
       item.id === id ? { ...item, completed: !item.completed } : item
     ));
   };
@@ -35,12 +35,12 @@ const HomePage: React.FC = () => {
       <h2 className="text-2xl font-bold mb-6 text-center">
         {formatDate()}
       </h2>
-      
+
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-xl font-semibold mb-4">오늘의 활동</h3>
         <ul className="space-y-3">
           {items.map(item => (
-            <li 
+            <li
               key={item.id}
               className="flex items-center space-x-3"
             >
@@ -50,11 +50,11 @@ const HomePage: React.FC = () => {
                 onChange={() => toggleItem(item.id)}
                 className="w-5 h-5 text-pink-500 rounded focus:ring-pink-500"
               />
-              <Link 
-                to={item.id === 1 ? '/card-game' : '#'} 
-                className={`${
-                  item.completed ? 'line-through text-gray-400' : 'text-gray-700'
-                }`}
+              <Link
+                to={item.id === 1 ? '/card-game' : item.id === 2
+                  ? '/spot-diff' : '#'}
+                className={`${item.completed ? 'line-through text-gray-400' : 'text-gray-700'
+                  }`}
               >
                 {item.text}
               </Link>
