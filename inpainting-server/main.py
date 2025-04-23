@@ -17,6 +17,7 @@ app.add_middleware(
 
 UPLOAD_DIR = "uploads"
 RESULT_DIR = "results"
+
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(RESULT_DIR, exist_ok=True)
 

@@ -1,132 +1,127 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import '../css/CardGamePage.css';
 
 interface Card {
   id: number;
-  image: string;
+  emoji: string;
   isFlipped: boolean;
   isMatched: boolean;
 }
 
+const springEmojis = ['🌸', '🌷', '🌺', '🌻', '🦋', '🐝'];
+
+const createShuffledCards = (): Card[] => {
+  const doubled = [...springEmojis, ...springEmojis];
+  const shuffled = doubled.sort(() => Math.random() - 0.5);
+  return shuffled.map((emoji, idx) => ({
+    id: idx,
+    emoji,
+    isFlipped: false,
+    isMatched: false,
+  }));
+};
+
 const CardGamePage: React.FC = () => {
-  const springEmojis = ['🌸', '🌺', '🌷', '🌹', '🌻', '🦋'];
-
-  const createCards = (): Card[] => {
-    const duplicated = [...springEmojis, ...springEmojis];
-    const shuffled = duplicated
-      .map((image) => ({ image, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map((item, index) => ({
-        id: index,
-        image: item.image,
-        isFlipped: false,
-        isMatched: false,
-      }));
-    return shuffled;
-  };
-
-  const [cards, setCards] = useState<Card[]>(createCards);
-  const [flippedCardIds, setFlippedCardIds] = useState<number[]>([]);
+  const [cards, setCards] = useState<Card[]>(createShuffledCards);
+  const [flipped, setFlipped] = useState<number[]>([]);
+  const [matchedCount, setMatchedCount] = useState(0);
   const [wrongAttempts, setWrongAttempts] = useState(0);
-  const [isChecking, setIsChecking] = useState(false);
-
-  const handleCardClick = (id: number) => {
-    const clickedCard = cards.find((c) => c.id === id);
-    if (!clickedCard || clickedCard.isFlipped || clickedCard.isMatched || isChecking) return;
-
-    const newFlipped = [...flippedCardIds, id];
-    setFlippedCardIds(newFlipped);
-
-    setCards((prev) =>
-      prev.map((card) => (card.id === id ? { ...card, isFlipped: true } : card))
-    );
-  };
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    if (flippedCardIds.length !== 2) return;
+    if (flipped.length === 2) {
+      setIsProcessing(true);
+      const [firstIdx, secondIdx] = flipped;
+      const first = cards[firstIdx];
+      const second = cards[secondIdx];
+      const newCards = [...cards];
 
-    setIsChecking(true);
-    const [firstId, secondId] = flippedCardIds;
-    const firstCard = cards.find((c) => c.id === firstId);
-    const secondCard = cards.find((c) => c.id === secondId);
-
-    if (!firstCard || !secondCard) return;
-
-    const isMatch = firstCard.image === secondCard.image;
-
-    setTimeout(() => {
-      if (isMatch) {
-        setCards((prev) =>
-          prev.map((card) =>
-            card.id === firstId || card.id === secondId
-              ? { ...card, isMatched: true }
-              : card
-          )
-        );
+      if (first.emoji === second.emoji) {
+        newCards[firstIdx].isMatched = true;
+        newCards[secondIdx].isMatched = true;
+        setMatchedCount((prev) => prev + 1);
       } else {
-        setCards((prev) =>
-          prev.map((card) =>
-            card.id === firstId || card.id === secondId
-              ? { ...card, isFlipped: false }
-              : card
-          )
-        );
         setWrongAttempts((prev) => prev + 1);
+        setTimeout(() => {
+          newCards[firstIdx].isFlipped = false;
+          newCards[secondIdx].isFlipped = false;
+          setCards(newCards);
+        }, 800); // 틀린 그림 보여주고 잠깐 후 원상복귀
       }
-      setFlippedCardIds([]);
-      setIsChecking(false);
-    }, 1000);
-  }, [flippedCardIds, cards]);
 
-  const resetGame = () => {
-    setCards(createCards());
-    setFlippedCardIds([]);
-    setWrongAttempts(0);
-    setIsChecking(false);
+      setTimeout(() => {
+        setFlipped([]);
+        setIsProcessing(false);
+      }, 800); // 처리 중 잠금 해제
+    }
+  }, [flipped]);
+
+  const handleClick = (index: number) => {
+    if (
+      !isProcessing &&
+      flipped.length < 2 &&
+      !cards[index].isFlipped &&
+      !cards[index].isMatched
+    ) {
+      const newCards = [...cards];
+      newCards[index].isFlipped = true;
+      setCards(newCards);
+      setFlipped((prev) => [...prev, index]);
+    }
   };
 
-  const isGameComplete = cards.every((card) => card.isMatched);
+  const handleReset = () => {
+    setCards(createShuffledCards());
+    setFlipped([]);
+    setMatchedCount(0);
+    setWrongAttempts(0);
+    setIsProcessing(false);
+  };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold mb-2">봄 카드 짝 맞추기</h2>
-        <p className="text-lg text-red-500">틀린 시도: {wrongAttempts}회</p>
-      </div>
+    <div className="min-h-screen px-4 py-8 bg-sakura-base">
+      <h2 className="text-2xl font-bold text-center mb-2 text-sakura-brown">카드 짝 맞추기 게임</h2>
+      <p className="text-center text-red-500 font-medium mb-6">오답 횟수: {wrongAttempts}</p>
 
-      <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
-        {cards.map((card) => (
-          <button
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-sm sm:max-w-md mx-auto">
+        {cards.map((card, index) => (
+          <div
             key={card.id}
-            onClick={() => handleCardClick(card.id)}
-            disabled={card.isMatched || isChecking}
-            className={`relative aspect-[3/4] rounded-xl shadow-lg flex items-center justify-center
-              text-4xl transition-all duration-300
-              ${
-                card.isFlipped || card.isMatched
-                  ? 'bg-pink-500 text-white'
-                  : 'bg-gray-300 text-gray-800'
-              }
-            `}
+            className="relative aspect-square cursor-pointer perspective"
+            onClick={() => handleClick(index)}
           >
-            {card.isFlipped || card.isMatched ? card.image : '?'}
-          </button>
+            <div
+              className={`w-full h-full transition-transform duration-500 transform-style preserve-3d ${card.isFlipped || card.isMatched ? 'rotate-y-180' : ''
+                }`}
+            >
+              {/* 앞면 */}
+              <div className="absolute inset-0 bg-cherry text-3xl flex items-center justify-center rounded-xl text-white backface-hidden rotate-y-180">
+                {card.emoji}
+              </div>
+
+              {/* 뒷면 */}
+              <div className="absolute inset-0 bg-gray-300 rounded-xl shadow-md flex items-center justify-center backface-hidden">
+                ❓
+              </div>
+            </div>
+          </div>
         ))}
       </div>
 
-      {isGameComplete && (
-        <div className="text-center mt-8">
-          <h3 className="text-xl font-bold text-green-600 mb-4">
-            🎉 축하합니다! 모든 카드를 맞추셨어요!
-          </h3>
+      {matchedCount === springEmojis.length && (
+        <div className="text-center mt-8 text-lg text-green-600 font-semibold">
+          🎉 모든 카드를 맞췄어요! 최고예요 봄이!
         </div>
       )}
 
-      <button
-        onClick={resetGame}
-        className="mt-8 px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors mx-auto block"
-      >
-        다시 시작
-      </button>
+      <div className="text-center mt-6">
+        <button
+          onClick={handleReset}
+          className="px-6 py-3 bg-cherry hover:bg-cherry-dark text-white rounded-lg transition-colors"
+        >
+          다시 시작하기
+        </button>
+      </div>
     </div>
   );
 };
