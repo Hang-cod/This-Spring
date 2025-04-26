@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { uploadImageForInpaint } from '../api/inpaintApi';
 import type { DiffBox } from '../api/inpaintApi';
 
-// 📍 API 서버 기본 주소 설정
+//  API 서버 기본 주소 설정
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 const SpotTheDifferencePage: React.FC = () => {
@@ -19,10 +19,12 @@ const SpotTheDifferencePage: React.FC = () => {
   const [gameStarted, setGameStarted] = useState(false); // 게임이 시작되었는지 여부
   const imgRef = useRef<HTMLImageElement | null>(null); // 수정된 이미지 참조 (클릭 좌표 계산용)
   const navigate = useNavigate(); // React Router로 페이지 이동
+  const [wrongClicks, setWrongClicks] = useState<{ x: number; y: number }[]>([]); // 오답 클릭 좌표 저장
 
   // 📸 파일 업로드 처리 함수
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    console.log(file); // 업로드된 파일 정보 콘솔에 출력
     if (file) {
       setUploadedFile(file); // 파일 상태 저장
       setOriginalImageUrl(URL.createObjectURL(file)); // 업로드된 이미지 미리보기
@@ -30,11 +32,13 @@ const SpotTheDifferencePage: React.FC = () => {
       setFound(false); // 정답 상태 초기화
       setWrongAttempts(0); // 오답 횟수 초기화
       setModifiedImageUrl(null); // 이전 수정본 제거
+      setWrongClicks([]); // 새 파일을 업로드 초기화
     }
   };
 
-  // 🧠 AI에게 틀린 그림 생성을 요청하는 함수
+  // AI에게 틀린 그림 생성을 요청하는 함수
   const handleStartGame = async () => {
+    console.log("데이터가 들어오나요?!@!"); // 디버깅용 콘솔 출력
     if (!uploadedFile) return; // 파일이 없으면 아무것도 하지 않음
     const result = await uploadImageForInpaint(uploadedFile); // 백엔드에 업로드 + AI로부터 수정본 수신
     setModifiedImageUrl(`${API_BASE_URL}${result.modified}`); // 수정 이미지 URL 설정
@@ -43,9 +47,12 @@ const SpotTheDifferencePage: React.FC = () => {
     setGameStarted(true); // 게임 시작 상태 변경
     setFound(false);
     setWrongAttempts(0);
+    setWrongClicks([]); // 새 게임 시작 시 오답 클릭 초기화
+    console.log(result); // AI 응답 결과 콘솔에 출력
   };
 
-  // 🎯 수정본 클릭 시 정답 여부 판단
+  //  수정본 클릭 시 정답 여부 판단
+  //화면 리사이징돼도 정확한 클릭 판정 가능.
   const handleClick = (e: React.MouseEvent<HTMLImageElement>) => {
     if (!imgRef.current || !diffBox || found) return; // 이미지 참조 또는 정답 박스가 없거나 이미 정답인 경우 무시
 
@@ -53,17 +60,32 @@ const SpotTheDifferencePage: React.FC = () => {
     const x = e.clientX - rect.left; // 클릭 좌표 X (이미지 내부 기준)
     const y = e.clientY - rect.top; // 클릭 좌표 Y
 
+    const scaleX = imgRef.current.naturalWidth / rect.width;
+    const scaleY = imgRef.current.naturalHeight / rect.height;
+
+
+    const clickedX = x * scaleX;
+    const clickedY = y * scaleY;
+
     // 정답 박스 안인지 판별
     const withinBox =
-      x >= diffBox.x &&
-      x <= diffBox.x + diffBox.width &&
-      y >= diffBox.y &&
-      y <= diffBox.y + diffBox.height;
+      clickedX >= diffBox.x &&
+      clickedX <= diffBox.x + diffBox.width &&
+      clickedY >= diffBox.y &&
+      clickedY <= diffBox.y + diffBox.height;
 
     if (withinBox) {
       setFound(true); // 정답일 경우
     } else {
       setWrongAttempts((prev) => prev + 1); // 오답일 경우 횟수 증가
+
+
+      const wrongX = (x / rect.width) * imgRef.current.naturalWidth;
+      const wrongY = (y / rect.height) * imgRef.current.naturalHeight;
+
+      setWrongClicks(prev => [...prev, { x: wrongX, y: wrongY }]);
+
+      navigator.vibrate?.(100); // 진동 피드백 (모바일에서만 동작)
     }
   };
 
@@ -73,12 +95,12 @@ const SpotTheDifferencePage: React.FC = () => {
         틀린 그림 찾기
       </h2>
 
-      {/* 🔼 파일 업로드 입력 */}
+      {/*  파일 업로드 입력 */}
       <div className="text-center mb-6">
         <input type="file" accept="image/*" onChange={handleFileChange} />
       </div>
 
-      {/* 📌 게임 시작 전: 원본만 보여주고 시작 버튼 표시 */}
+      {/*  게임 시작 전: 원본만 보여주고 시작 버튼 표시 */}
       {originalImageUrl && !gameStarted && (
         <div className="text-center">
           <img src={originalImageUrl} alt="업로드 원본" className="rounded-xl mx-auto shadow" />
@@ -86,12 +108,12 @@ const SpotTheDifferencePage: React.FC = () => {
             onClick={handleStartGame}
             className="mt-6 px-6 py-3 bg-pink-500 text-white text-lg rounded-lg shadow hover:bg-pink-600 transition"
           >
-            🧠 틀린 그림 만들기 시작
+            틀린 그림 만들기 시작
           </button>
         </div>
       )}
 
-      {/* ▶️ 게임 시작 후: 원본 + 수정본 비교 */}
+      {/*게임 시작 후: 원본 + 수정본 비교 */}
       {gameStarted && originalImageUrl && modifiedImageUrl && (
         <>
           <p className="text-center text-red-500 mt-6 mb-4 font-medium">
@@ -109,14 +131,30 @@ const SpotTheDifferencePage: React.FC = () => {
                 className="rounded-lg shadow cursor-pointer"
               />
               {/* ✅ 정답을 맞췄을 경우 박스 표시 */}
-              {found && diffBox && (
+              {wrongClicks.map((click, index) => (
                 <div
-                  className="absolute border-4 border-green-400 z-10"
+                  key={index}
+                  className="absolute text-red-500 text-3xl font-bold opacity-70"
                   style={{
-                    left: diffBox.x,
-                    top: diffBox.y,
-                    width: diffBox.width,
-                    height: diffBox.height,
+                    left: (click.x / imgRef.current!.naturalWidth) * imgRef.current!.width - 10,
+                    top: (click.y / imgRef.current!.naturalHeight) * imgRef.current!.height - 10,
+                    pointerEvents: 'none',
+                    transform: 'rotate(-20deg)',
+                  }}
+                >
+                  ✖
+                </div>
+              ))}
+
+              {found && diffBox && imgRef.current && (
+                <div
+                  className="absolute border-4 border-green-400 z-10 transition-all"
+                  style={{
+                    left: (diffBox.x / imgRef.current.naturalWidth) * imgRef.current.width,
+                    top: (diffBox.y / imgRef.current.naturalHeight) * imgRef.current.height,
+                    width: (diffBox.width / imgRef.current.naturalWidth) * imgRef.current.width,
+                    height: (diffBox.height / imgRef.current.naturalHeight) * imgRef.current.height,
+                    borderRadius: '50%',
                     pointerEvents: 'none',
                   }}
                 />
@@ -128,22 +166,19 @@ const SpotTheDifferencePage: React.FC = () => {
 
       {/* 🎉 정답 메시지 */}
       {found && (
-        <div className="text-center mt-6 text-green-600 font-bold text-lg">
-          🎉 정답이에요 봄이!
+        <div className="flex flex-col justify-center items-center mt-8 gap-4">
+          <div className="text-green-600 font-extrabold text-xl">
+            🎉 정답이에요 봄이!
+          </div>
+          <button
+            onClick={() => navigate('/home')}
+            className="px-6 py-3 bg-sakura-button text-white rounded-full hover:bg-sakura-button-dark text-lg transition shadow-lg"
+          >
+            홈으로 돌아가기
+          </button>
         </div>
-      )}
-
-      {/* 🔚 홈으로 돌아가기 버튼 */}
-      <div className="text-center mt-6">
-        <button
-          onClick={() => navigate('/home')}
-          className="px-6 py-3 bg-sakura-button text-white rounded-lg hover:bg-sakura-button-dark transition"
-        >
-          홈으로 돌아가기
-        </button>
-      </div>
+      )};
     </div>
-  );
-};
-
-export default SpotTheDifferencePage;
+  )
+}
+      export default SpotTheDifferencePage;
