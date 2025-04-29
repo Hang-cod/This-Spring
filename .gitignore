@@ -1,32 +1,47 @@
-# Dependencies
-node_modules
-.pnp
-.pnp.js
+node_modules/
+build/
+dist/
 
-# Testing
-coverage
+# Python
+__pycache__/
+*.py[cod]
+*.so
+venv/
+venv39/
 
-# Production
-build
-dist
+# Jupyter
+.ipynb_checkpoints/
 
-# Misc
+# Models / Large files
+*.ckpt
+*.pth
+*.pyd
+*.dll
+*.lib
+*.h5
+*.pb
+*.onnx
+
+# Cache & Logs
+*.log
+*.out
+*.pid
+
+# Environment
+.env
+.env.*
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# VSCode / JetBrains / Misc
+.vscode/
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.sw? 
+*.sw?
+
+# Others
+*.zip
+*.tar.gz
+*.egg-info
