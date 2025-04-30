@@ -45,3 +45,4 @@ venv39/
 *.zip
 *.tar.gz
 *.egg-info
+lama-model/
