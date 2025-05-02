@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../css/CardGamePage.css';
+import { useNavigate } from 'react-router-dom';
 
 interface Card {
   id: number;
@@ -22,6 +23,7 @@ const createShuffledCards = (): Card[] => {
 };
 
 const CardGamePage: React.FC = () => {
+  const navigate = useNavigate();
   const [cards, setCards] = useState<Card[]>(createShuffledCards);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matchedCount, setMatchedCount] = useState(0);
@@ -77,6 +79,15 @@ const CardGamePage: React.FC = () => {
     setWrongAttempts(0);
     setIsProcessing(false);
   };
+  useEffect(() => {
+    if (matchedCount === springEmojis.length) {
+      setTimeout(() => {
+        alert("🎉 모든 카드를 맞췄어요! 최고예요 봄이!");
+        localStorage.setItem('card-game-done', 'true');
+        navigate('/home');
+      }, 300); // 약간의 여유 시간 (카드 뒤집히는 애니메이션 후)
+    }
+  }, [matchedCount]);
 
   return (
     <div className="min-h-screen px-4 py-8 bg-sakura-base">

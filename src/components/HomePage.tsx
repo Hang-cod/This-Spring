@@ -1,5 +1,4 @@
-// src/components/HomePage.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 interface ChecklistItem {
@@ -7,19 +6,42 @@ interface ChecklistItem {
   text: string;
   path: string;
   completed: boolean;
+  locked: boolean; // ✅ true면 체크 불가능 (다시)
 }
 
 const HomePage: React.FC = () => {
   const [items, setItems] = useState<ChecklistItem[]>([
-    { id: 1, text: '카드 뒤집기', path: '/card-game', completed: false },
-    { id: 2, text: '틀린 그림 찾기', path: '/spot-diff', completed: false },
-    { id: 3, text: '그림 의미 서술', path: '#', completed: false },
+    { id: 1, text: '카드 뒤집기', path: '/card-game', completed: false, locked: false },
+    { id: 2, text: '틀린 그림 찾기', path: '/spot-diff', completed: false, locked: false },
+    { id: 3, text: '그림 의미 서술', path: '/describe', completed: false, locked: true },
   ]);
 
+  useEffect(() => {
+    // 그림 의미 서술 완료 여부 로컬스토리지에서 확인
+    const isDescribeDone = localStorage.getItem('describe-done') === 'true';
+    if (isDescribeDone) {
+      setItems(prev =>
+        prev.map(item =>
+          item.text === '그림 의미 서술' ? { ...item, completed: true } : item
+        )
+      );
+    }
+  }, []);
+
   const toggleItem = (id: number) => {
-    setItems(items.map(item =>
-      item.id === id ? { ...item, completed: !item.completed } : item
-    ));
+    setItems(prev =>
+      prev.map(item => {
+        if (item.id === id) {
+          if (item.locked) return item; // 다시 체크 불가
+          if (item.completed) return item; // 이미 체크한 항목은 무시
+          const confirm = window.confirm(`정말 "${item.text}" 활동을 완료하셨나요?`);
+          if (confirm) {
+            return { ...item, completed: true, locked: true };
+          }
+        }
+        return item;
+      })
+    );
   };
 
   const formatDate = () => {
@@ -48,6 +70,7 @@ const HomePage: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={item.completed}
+                  disabled={item.locked || item.completed}
                   onChange={() => toggleItem(item.id)}
                   className="w-5 h-5 text-cherry-dark rounded focus:ring-cherry-dark"
                 />
@@ -59,14 +82,12 @@ const HomePage: React.FC = () => {
                 </span>
               </label>
 
-              {item.path !== '#' && (
-                <Link
-                  to={item.path}
-                  className="text-sm px-3 py-1 bg-cherry DEFAULT text-white rounded-md hover:bg-cherry-dark transition-colors"
-                >
-                  이동
-                </Link>
-              )}
+              <Link
+                to={item.path}
+                className="text-sm px-3 py-1 bg-cherry DEFAULT text-white rounded-md hover:bg-cherry-dark transition-colors"
+              >
+                이동
+              </Link>
             </li>
           ))}
         </ul>
