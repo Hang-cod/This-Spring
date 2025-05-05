@@ -1,11 +1,11 @@
 // src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import StartPage from './components/StartPage';
-import HomePage from './components/HomePage';
-import CardGamePage from './components/CardGamePage';
-import SpotTheDifferencePage from './components/SpotTheDifferencePage';
-import MeaningDescribePage from './components/MeaningDescribePage';
+import StartPage from './pages/start/StartPage';
+import HomePage from './pages/home/HomePage';
+import CardGamePage from './pages/cardgame/CardGamePage';
+import SpotTheDifferencePage from './pages/spotdifference/SpotTheDifferencePage';
+import MeaningDescribePage from './pages/describe/MeaningDescribePage';
 
 function App() {
   return (
