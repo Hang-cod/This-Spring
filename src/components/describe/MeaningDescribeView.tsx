@@ -45,10 +45,11 @@ const MeaningDescribeComponent: React.FC = () => {
                         imageId: dummyImage.id,
                         description,
                     });
-                    localStorage.setItem('meaning-describe-done', 'true');
+                    localStorage.setItem('describe-done', 'true');
                     alert('기록이 저장되었어요!');
                     navigate('/home');
                 }}
+                
             >
                 기록 완료
             </button>
