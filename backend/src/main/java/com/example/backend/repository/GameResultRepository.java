@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface GameResultRepository extends JpaRepository<GameResult, Long> {
+
     List<GameResult> findByUserAndDate(User user, LocalDate date);
 
     List<GameResult> findByUserAndGameType(User user, GameType gameType);
