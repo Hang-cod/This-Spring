@@ -1,4 +1,4 @@
-package com.example.backend.service.EmotionService;
+package com.example.backend.service.emotion;
 
 import com.example.backend.dto.EmotionRecordDTO;
 import com.example.backend.entity.EmotionRecord;

@@ -9,4 +9,7 @@ import java.util.List;
 
 public interface EmotionRecordRepository extends JpaRepository<EmotionRecord, Long> {
     List<EmotionRecord> findByUserAndDate(User user, LocalDate date);
+
+    List<EmotionRecord> findByUser(User user);
+
 }

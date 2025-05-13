@@ -1,4 +1,4 @@
-package com.example.backend.service.GameResultService;
+package com.example.backend.service.gameResult;
 
 import com.example.backend.dto.GameResultDTO;
 

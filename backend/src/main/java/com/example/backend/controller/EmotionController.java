@@ -1,7 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.EmotionRecordDTO;
-import com.example.backend.service.EmotionService.EmotionService;
+import com.example.backend.service.emotion.EmotionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
