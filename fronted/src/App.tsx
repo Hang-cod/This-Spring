@@ -6,8 +6,10 @@ import HomePage from './pages/home/HomePage';
 import CardGamePage from './pages/cardgame/CardGamePage';
 import SpotTheDifferencePage from './pages/spotdifference/SpotTheDifferencePage';
 import MeaningDescribePage from './pages/describe/MeaningDescribePage';
+import { useInitUser } from './hooks/useInitUser';
 
 function App() {
+  useInitUser();
   return (
     <Router>
       <Routes>

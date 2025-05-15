@@ -8,6 +8,7 @@ import com.example.backend.repository.GameResultRepository;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Primary
 public class CalendarStatsServiceImpl implements CalendarStatsService {
 
     @Qualifier("emotionStatsService")

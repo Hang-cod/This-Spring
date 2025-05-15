@@ -24,7 +24,7 @@ public class EmotionServiceImpl implements EmotionService {
     public void saveEmotion(EmotionRecordDTO dto) {
 
         //예외처리
-        User user = userRepository.findById(dto.getUserID())
+        User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
         EmotionRecord record = EmotionRecord.builder()
@@ -45,7 +45,7 @@ public class EmotionServiceImpl implements EmotionService {
         List<EmotionRecord> records =emotionRecordRepository.findByUserAndDate(user,LocalDate.now());
        return records.stream().map(record -> EmotionRecordDTO.builder()
                .id(record.getId())
-               .userID(userId)
+               .userId(userId)
                .imageId(record.getImageId())
                .description(record.getDescription())
                .date(record.getDate())

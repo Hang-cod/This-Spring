@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/emotion")
 @RequiredArgsConstructor
-@CrossOrigin("origins = http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173")
 public class GameResultController {
 
 

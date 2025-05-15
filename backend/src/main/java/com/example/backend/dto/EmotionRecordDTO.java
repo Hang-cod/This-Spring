@@ -14,7 +14,7 @@ import java.time.LocalDate;
 public class EmotionRecordDTO {
 
     private Long id;
-    private Long  userID;
+    private Long  userId;
     private String imageId;
     private String description;
     private LocalDate date;

@@ -1,6 +1,7 @@
 // 📁 src/components/describe/MeaningDescribeComponent.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { saveEmotion } from '../../api/emotionApi';
 
 // 👉 실제 서버 연동 전, 임시 이미지 URL
 const dummyImage = {
@@ -11,6 +12,26 @@ const dummyImage = {
 const MeaningDescribeComponent: React.FC = () => {
     const [description, setDescription] = useState('');
     const navigate = useNavigate();
+
+    const handleSubmit = async () => {
+        const userId = Number(localStorage.getItem('userId'));
+        const imageId = dummyImage.id;
+        const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+        try {
+            console.log(userId, imageId, description, date);
+            await saveEmotion({ userId, imageId, description, date });
+            localStorage.setItem('describe-done', 'true');
+            console.log('✨ 감정 전송 데이터:', { userId, imageId, description, date });
+
+            alert('기록이 저장되었어요!');
+            navigate('/home');
+        } catch (err) {
+            console.error('❌ 감정 저장 실패:', err);
+            alert('감정 저장에 실패했어요. 나중에 다시 시도해 주세요.');
+        }
+    };
+
 
     return (
         <div className="flex flex-col items-center justify-start px-4 py-6 min-h-screen bg-pink-50">
@@ -41,15 +62,8 @@ const MeaningDescribeComponent: React.FC = () => {
                 disabled={!description}
                 className="w-full max-w-md py-3 bg-pink-500 text-white text-lg font-semibold rounded-xl shadow hover:bg-pink-600 disabled:bg-pink-200 transition-all duration-200"
                 onClick={() => {
-                    console.log('기록 완료:', {
-                        imageId: dummyImage.id,
-                        description,
-                    });
-                    localStorage.setItem('describe-done', 'true');
-                    alert('기록이 저장되었어요!');
-                    navigate('/home');
+                    handleSubmit();
                 }}
-                
             >
                 기록 완료
             </button>
