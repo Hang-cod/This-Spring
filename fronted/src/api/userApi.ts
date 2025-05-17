@@ -11,3 +11,12 @@ export const checkOrCreateUser = async (deviceId: string): Promise<UserResponse>
     const response = await axios.post<UserResponse>(`${API_BASE_URL}/api/users/check`, { deviceId });
     return response.data;
 };
+export const getUser = async (userId: number): Promise<UserResponse> => {
+    const response = await axios.get<UserResponse>(`${API_BASE_URL}/api/users/${userId}`);
+    return response.data;
+};
+  
+export const userApi = {
+    checkOrCreateUser,
+    getUser,
+  };
